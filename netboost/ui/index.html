@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>NETBOOST</title>
+<style>
+body{margin:0;min-height:100vh;font-family:Segoe UI,Helvetica,sans-serif;color:#eef6ff;background:linear-gradient(180deg,#0b1220,#070b14)}
+.wrap{max-width:1040px;margin:0 auto;padding:22px 16px 48px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;letter-spacing:.14em;font-weight:750}
+.mark{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#3ce7ff,#1d7cff);color:#041018;display:grid;place-items:center;font-weight:800}
+nav{display:flex;gap:8px;flex-wrap:wrap}
+button{border:0;border-radius:12px;padding:11px 14px;font-weight:700;cursor:pointer}
+nav button{background:#0c1524;color:#93a4bc;border:1px solid #24344c}
+nav button.on{color:#041018;background:#3ce7ff}
+.card{background:#101826ee;border:1px solid #24344c;border-radius:22px;padding:22px;margin-top:16px}
+h1{font-size:36px;line-height:1.1;margin:8px 0}
+.sub{color:#93a4bc}
+input{width:100%;margin-top:8px;background:#0b1322;color:#fff;border:1px solid #24344c;border-radius:12px;padding:14px;font-size:16px}
+.go{width:100%;margin-top:14px;background:#3ce7ff;color:#041018;font-size:16px}
+.ghost{width:100%;margin-top:8px;background:transparent;color:#eef6ff;border:1px solid #24344c}
+canvas{width:100%;height:240px;display:block;border-radius:18px;background:radial-gradient(circle at 50% 60%,#123055,#070d18);border:1px solid #24344c}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.box{background:#0b1322;border:1px solid #24344c;border-radius:16px;padding:16px;margin-top:12px}
+.k{color:#93a4bc;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.hide{display:none}
+@media(max-width:740px){.grid{grid-template-columns:1fr}h1{font-size:28px}}
+</style></head><body>
+<div class="wrap">
+<header><div class="brand"><div class="mark">N</div> NETBOOST</div>
+<nav><button id="n-home" class="on" onclick="show('home')">Check</button><button id="n-result" onclick="show('result')">Result</button></nav></header>
+<section id="home" class="card"><div class="k">Any provider</div><h1>Let's see what is slowing you down.</h1>
+<canvas id="scene" width="960" height="280"></canvas>
+<p class="sub">The left node is your house. The right node is your provider. A bright node means that side is the slow one.</p>
+<label class="k">YOUR PLAN SPEED</label><input id="plan" value="100"/>
+<button class="go" onclick="run(true)">Check my internet</button>
+<button class="ghost" onclick="run(false)">Look only, change nothing</button>
+<div class="grid"><div class="box"><div class="k">House</div><p>Weak Wi-Fi, a busy download, or a slow address book. These we can try to fix.</p></div><div class="box"><div class="k">Provider</div><p>Router is quick, internet past it is slow. We can prove it. We cannot add their speed.</p></div></div></section>
+<section id="result" class="card hide"><div class="k">Result</div><h1 id="title">Checking...</h1><p id="body" class="sub"></p></section>
+</div>
+<script>
+const canvas=document.getElementById('scene');const ctx=canvas.getContext('2d');let tick=0;
+function node(x,y,label,hot){ctx.save();ctx.translate(x,y);ctx.strokeStyle=hot?'#f0b429':'#3ce7ff';ctx.fillStyle='rgba(8,16,32,.8)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,28,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#eef6ff';ctx.font='13px Segoe UI';ctx.textAlign='center';ctx.fillText(label,0,46);ctx.restore();}
+function draw(){tick+=0.02;ctx.clearRect(0,0,canvas.width,canvas.height);const y=130+Math.sin(tick)*6;ctx.strokeStyle='rgba(60,231,255,.45)';ctx.setLineDash([6,8]);ctx.beginPath();ctx.moveTo(180,y);ctx.lineTo(480,y);ctx.lineTo(780,y);ctx.stroke();ctx.setLineDash([]);node(180,y,'House',false);node(480,y,'Router',false);node(780,y,'Provider',true);requestAnimationFrame(draw);}draw();
+function show(id){document.getElementById('home').classList.toggle('hide',id!=='home');document.getElementById('result').classList.toggle('hide',id!=='result');document.getElementById('n-home').classList.toggle('on',id==='home');document.getElementById('n-result').classList.toggle('on',id==='result');}
+async function run(){show('result');document.getElementById('title').textContent='Checking...';const res=await fetch('/api/check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan:document.getElementById('plan').value})});const data=await res.json();document.getElementById('title').textContent=data.title;document.getElementById('body').textContent=data.body;}
+</script></body></html>
