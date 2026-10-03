@@ -1,4 +1,4 @@
-name: Build Windows exe
+name: Build Windows installer
 
 on:
   push:
@@ -15,9 +15,13 @@ jobs:
           python-version: "3.12"
       - name: Install packager
         run: python -m pip install pyinstaller
-      - name: Build NETBOOST.exe
-        run: python -m PyInstaller --noconfirm --onefile --name NETBOOST --add-data "netboost/ui/index.html;netboost/ui" launch.py
+      - name: Build desktop program
+        run: python -m PyInstaller --noconfirm --onefile --windowed --name NETBOOST desktop.py
+      - name: Install Inno Setup
+        run: choco install innosetup -y
+      - name: Build installer
+        run: "& 'C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe' setup.iss"
       - uses: actions/upload-artifact@v4
         with:
-          name: NETBOOST-exe
-          path: dist/NETBOOST.exe
+          name: NETBOOST-setup
+          path: Output/NETBOOST-setup.exe
